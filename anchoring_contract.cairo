@@ -11,8 +11,9 @@ mod Anchoring {
     struct Storage {
         whitelisted: ContractAddress, // The address of the whitelisted contract
         size_index: u128, // size of the array
-        messages_value: LegacyMap<u128, felt252>, // message
-        messages_timestamp: LegacyMap<u128, u64> // timestamp
+        messages_value: LegacyMap<u128, felt252>, // index, message
+        messages_timestamp: LegacyMap<u128, u64>, // index, timestamp
+        anchored_messages: LegacyMap<felt252, u64> // message, timestamp
     }
 
     // Function used to initialize the contract
@@ -25,10 +26,11 @@ mod Anchoring {
     // Function used to anchor a new value
     #[external]
     fn anchor(message: felt252) {
-        assert(has_not_been_anchored(message), 'already_anchored');
+        assert(anchored_messages::read(message) > 0, 'already_anchored');
         assert(get_caller_address() == whitelisted::read() , 'not_whitelisted_caller');
         messages_value::write(size_index::read(), message);
         messages_timestamp::write(size_index::read(), get_block_timestamp());
+        anchored_messages::write(message, get_block_timestamp());
         size_index::write(size_index::read() + 1);
     }
 
@@ -47,6 +49,11 @@ mod Anchoring {
     }
 
     #[external]
+    fn get_anchored_timestamp(message: felt252) -> u64 {
+        anchored_messages::read(message)
+    }
+
+    #[external]
     fn get_anchored_timestamps() -> Array::<u64> {
         let mut values = ArrayTrait::new();
         construct_anchored_timestamps_array(values, 0_u128)
@@ -60,17 +67,6 @@ mod Anchoring {
         } else {
             values
         }
-    }
-
-    #[external]
-    fn has_not_been_anchored(message: felt252) -> bool {
-        check_if_anchored_at_index(message, 0_u128, true)
-    }
-
-    fn check_if_anchored_at_index(message: felt252, index: u128, current_state: bool) -> bool {
-        if size_index::read() < index {
-            if messages_value::read(index) == message { false } else { true }
-        } else { current_state }
     }
 
 }
