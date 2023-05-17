@@ -60,15 +60,14 @@ mod Anchoring {
         } else {
             values
         }
-        
     }
 
     #[external]
     fn has_not_been_anchored(message: felt252) -> bool {
-        check_value_at_index(message, 0_u128, true)
+        check_if_anchored_at_index(message, 0_u128, true)
     }
 
-    fn check_value_at_index(message: felt252, index: u128, current_state: bool) -> bool {
+    fn check_if_anchored_at_index(message: felt252, index: u128, current_state: bool) -> bool {
         if size_index::read() < index {
             if messages_value::read(index) == message { false } else { true }
         } else { current_state }
