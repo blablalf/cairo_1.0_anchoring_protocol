@@ -25,7 +25,7 @@ mod Anchoring {
     // Function used to anchor a new value
     #[external]
     fn anchor(message: felt252) {
-        //assert(messages_value::read(message) > 0, 'already_anchored');
+        assert(has_not_been_anchored(message), 'already_anchored');
         assert(get_caller_address() == whitelisted::read() , 'not_whitelisted_caller');
         messages_value::write(size_index::read(), message);
         messages_timestamp::write(size_index::read(), get_block_timestamp());
@@ -43,10 +43,7 @@ mod Anchoring {
         if size_index::read() < index {
             values.append(messages_value::read(index));
             construct_anchored_values_array(values, index + 1)
-        } else {
-            values
-        }
-        
+        } else { values }
     }
 
     #[external]
@@ -66,6 +63,15 @@ mod Anchoring {
         
     }
 
-    
+    #[external]
+    fn has_not_been_anchored(message: felt252) -> bool {
+        check_value_at_index(message, 0_u128, true)
+    }
+
+    fn check_value_at_index(message: felt252, index: u128, current_state: bool) -> bool {
+        if size_index::read() < index {
+            if messages_value::read(index) == message { false } else { true }
+        } else { current_state }
+    }
 
 }
