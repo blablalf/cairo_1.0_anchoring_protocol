@@ -1,3 +1,4 @@
+use core::traits::Into;
 #[contract]
 mod Factory {
     use starknet::ContractAddress;
@@ -5,7 +6,7 @@ mod Factory {
     use starknet::deploy_syscall;
     use starknet::class_hash::ClassHash;
     use array::ArrayTrait;
-    use array::SpanTrait; // we should maybe have to use it for 
+    use traits::Into;
 
     // Storage variable used to store the anchored value
     struct Storage {
@@ -52,4 +53,13 @@ mod Factory {
         deployed_addr
     }
 
+    #[view]
+    fn get_admin() -> ContractAddress {
+        admin::read()
+    }
+
+    #[view]
+    fn get_whitelisted(anchored_contract_address: ContractAddress) -> ContractAddress {
+        whitelist::read(anchored_contract_address)
+    }
 }
