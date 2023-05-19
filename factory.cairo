@@ -4,6 +4,8 @@ mod Factory {
     use starknet::get_caller_address;
     use starknet::deploy_syscall;
     use starknet::class_hash::ClassHash;
+    use array::ArrayTrait;
+    use array::SpanTrait; // we should maybe have to use it for 
 
     // Storage variable used to store the anchored value
     struct Storage {
@@ -29,14 +31,24 @@ mod Factory {
     #[external]
     fn deploy(whitelisted: ContractAddress) -> ContractAddress {
         assert(get_caller_address() == admin::read() , 'not_whitelisted_caller');
+
+        // Creating the call data for the deploy syscall
+        let mut calldata_array = ArrayTrait::new();
+        calldata_array.append(whitelisted.into());
+
+        // Deploying the contract
         let result = deploy_syscall(
             class_hash::read(),
-            contract_address_salt: felt252,
-            // calldata: Span<felt252>, // Should contain whitelisted value
+            '', //contract_address_salt: felt252,
+            calldata_array.span(),// calldata: Span<felt252>, // Should contain whitelisted value
             false,
         );
+
+        // Adding the contract to the whitelist mapping
         let (deployed_addr, _) = result.unwrap_syscall();
         whitelist::write(deployed_addr, whitelisted);
+
+        // Returning the deployed contract address
         deployed_addr
     }
 

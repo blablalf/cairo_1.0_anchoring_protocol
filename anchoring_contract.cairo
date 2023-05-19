@@ -5,7 +5,6 @@ mod Anchoring {
     use starknet::get_block_timestamp;
     use starknet::ContractAddress;
     use array::ArrayTrait;
-    use clone::Clone;
 
     // Storage variable used to store the anchored value
     struct Storage {
