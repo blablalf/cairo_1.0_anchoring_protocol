@@ -75,7 +75,7 @@ For more details and updates, please visit the [repository](https://github.com/b
     Since the factory will deploy instances of the `Anchor` contract, we don't have to deploy it manually, but you can do it with the class hash if you want.  
     
 ## How to interact with the contract
-- First of all, go the [contract page into the explorer, into the tab **Read/Write**](https://testnet.starkscan.co/contract/0x01e28b415dc375049c2c4bfdabad58e63e19d45aecbfaa4fad78991d55b6eaf7#read-write-contract), then you should be able to consult the current anchored value by calling `my_anchored()` function.
+- First of all, go the [contract page into the explorer, into the tab **Read/Write**](https://testnet.starkscan.co/contract/0x052f22954c9fd59ebe1480bd3ba1e2977b6ca4321b9c862ff6554ca50ae9919f#read-write-contract), then you should be able to consult the current anchored value by calling `my_anchored()` function.
 - For the next interactions, you will need to get a wallet that will make you able to interact with functions on the explorer like [ArgentX](https://www.argent.xyz/argent-x/). 
 - You will need to create a wallet and fund it with something like `0.001eth` to be fine.
 - You can now prepare your message, it can be a number or a string, if you want to do a string you can use a tool like [this](https://string-functions.com/string-hex.aspx) in order to generate an hex version of your string.
