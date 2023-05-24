@@ -28,14 +28,14 @@ mod Factory {
         admin::write(new_admin);
     }
 
-    // Function used to deploy and add a new contract to the whitelist
+    // Function used to deploy a new anchoring contract
     #[external]
-    fn deploy(whitelisted: ContractAddress) -> ContractAddress {
-        assert(get_caller_address() == admin::read() , 'not_whitelisted_caller');
+    fn deploy(use_whitelist: ContractAddress) -> ContractAddress {
+        assert(get_caller_address() == admin::read() , 'not_admin_caller');
 
         // Creating the call data for the deploy syscall
         let mut calldata_array = ArrayTrait::new();
-        calldata_array.append(whitelisted.into());
+        calldata_array.append(use_whitelist.into());
 
         // Deploying the contract
         let result = deploy_syscall(
