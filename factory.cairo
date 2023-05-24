@@ -5,6 +5,7 @@ mod Factory {
     use starknet::get_caller_address;
     use starknet::deploy_syscall;
     use starknet::class_hash::ClassHash;
+    use starknet::get_block_timestamp;
     use array::ArrayTrait;
     use traits::Into;
 
@@ -40,7 +41,10 @@ mod Factory {
         // Deploying the contract
         let result = deploy_syscall(
             class_hash::read(),
-            '', //contract_address_salt: felt252,
+            get_block_timestamp().into(),
+            // contract_address_salt: felt252, value used in order to calculate the futur contract address,
+            // in the futur we need to add some randomness here otherwise we might be able to predict the
+            // contract address and deploy a contract with the same address as an existing one.
             calldata_array.span(),// calldata: Span<felt252>, // Should contain whitelisted value
             false,
         );

@@ -44,10 +44,10 @@ For more details and updates, please visit the [repository](https://github.com/b
     (If didn't set up an env var for this, you may need to define the network you want with `--network the_network`).  
     The return for the `factory` should be like this:
     ```
-    Sending the transaction with max_fee: 0.000201 ETH (200935194664051 WEI).
+    Sending the transaction with max_fee: 0.000035 ETH (35060876251879 WEI).
     Declare transaction was sent.
-    Contract class hash: 0x5bf693599dc9d775fff1adcf36233cbefdc164245ba1f2256c7b92d962dd87a
-    Transaction hash: 0x36baeb1394db40b8768a41e99ca89eb1f39d9538f50693c78d7874e46233a6f
+    Contract class hash: 0x54f828411babff897416e1e67ab0d4b460e1a375ec97280042598d7c16682da
+    Transaction hash: 0x424f64f152fa11725e1d5b7b03bd4a61528ff6bd677ed9538323da31bbb9a43
     ```
     You can find the transaction [here](https://testnet.starkscan.co/tx/0x36baeb1394db40b8768a41e99ca89eb1f39d9538f50693c78d7874e46233a6f).  
   
@@ -62,20 +62,20 @@ For more details and updates, please visit the [repository](https://github.com/b
 
 - Now, deploy your own instance of your factory (with the previous class hash):
     ```
-    starknet deploy --class_hash 0x5bf693599dc9d775fff1adcf36233cbefdc164245ba1f2256c7b92d962dd87a --input 0x058c19CCF47AFd7acC6db057FE4c6676168b130281C315007075fCD732503B7D 0x2d099db76414515e745d68a83a1a8324b7a408fb454f3ac590cc889ba97dc62 --account name_of_the_account_previously_created_into_your_env_setup
+    starknet deploy --class_hash 0x54f828411babff897416e1e67ab0d4b460e1a375ec97280042598d7c16682da --input 0x058c19CCF47AFd7acC6db057FE4c6676168b130281C315007075fCD732503B7D 0x2d099db76414515e745d68a83a1a8324b7a408fb454f3ac590cc889ba97dc62 --account name_of_the_account_previously_created_into_your_env_setup
     ```
     The return should look like this:
     ```
-    Sending the transaction with max_fee: 0.000976 ETH (976148037483525 WEI).
+    Sending the transaction with max_fee: 0.000159 ETH (158573030353235 WEI).
     Invoke transaction for contract deployment was sent.
-    Contract address: 0x052f22954c9fd59ebe1480bd3ba1e2977b6ca4321b9c862ff6554ca50ae9919f
-    Transaction hash: 0x3fc2f9df5832cad6d74992ade4b6d3054f19e8645bce89f065b3f1d72623010
+    Contract address: 0x02949d387aeb62a765f9ae174018583523dff16e78f992ad0e3ab3246ded87ed
+    Transaction hash: 0x819882fb69cdbf0a28d0753bc034be0978b7dc4e27fd3b8eee79d6a134b84
     ```
-    You can find the transaction [here](https://testnet.starkscan.co/tx/0x3fc2f9df5832cad6d74992ade4b6d3054f19e8645bce89f065b3f1d72623010) and you can interact with the contract [here](https://testnet.starkscan.co/contract/0x052f22954c9fd59ebe1480bd3ba1e2977b6ca4321b9c862ff6554ca50ae9919f).  
+    You can find the transaction [here](https://testnet.starkscan.co/tx/0x819882fb69cdbf0a28d0753bc034be0978b7dc4e27fd3b8eee79d6a134b84) and you can interact with the contract [here](https://testnet.starkscan.co/contract/0x02949d387aeb62a765f9ae174018583523dff16e78f992ad0e3ab3246ded87ed).  
     Since the factory will deploy instances of the `Anchor` contract, we don't have to deploy it manually, but you can do it with the class hash if you want.  
     
 ## How to interact with the contract
-- First of all, go the [contract page into the explorer, into the tab **Read/Write**](https://testnet.starkscan.co/contract/0x052f22954c9fd59ebe1480bd3ba1e2977b6ca4321b9c862ff6554ca50ae9919f#read-write-contract), then you should be able to consult the current anchored value by calling `my_anchored()` function.
+- First of all, go the [contract page into the explorer, into the tab **Read/Write**](https://testnet.starkscan.co/contract/0x02949d387aeb62a765f9ae174018583523dff16e78f992ad0e3ab3246ded87ed#read-write-contract), then you should be able to consult the current anchored value by calling `my_anchored()` function.
 - For the next interactions, you will need to get a wallet that will make you able to interact with functions on the explorer like [ArgentX](https://www.argent.xyz/argent-x/). 
 - You will need to create a wallet and fund it with something like `0.001eth` to be fine.
 - You can now prepare your message, it can be a number or a string, if you want to do a string you can use a tool like [this](https://string-functions.com/string-hex.aspx) in order to generate an hex version of your string.
