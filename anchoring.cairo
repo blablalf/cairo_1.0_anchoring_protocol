@@ -8,27 +8,88 @@ mod Anchoring {
 
     // Storage variable used to store the anchored value
     struct Storage {
-        whitelisted: ContractAddress, // The address of the whitelisted contract
+        contract_label: felt252, // The label of the client
+        admin: ContractAddress, // The address of the admin of contract
         size_index: u128, // size of the array
         message_values: LegacyMap<u128, felt252>, // index, message
-        message_timestamp: LegacyMap<felt252, u64> // message, timestamp
+        message_timestamp: LegacyMap<felt252, u64>, // message, timestamp
+        whitelisted: LegacyMap<ContractAddress, bool>, // The address of the whitelisted contract
+        description_length: u32, // The length of the array
+        description: LegacyMap::<u32, felt252>, // The description of the contract
     }
 
     // Function used to initialize the contract
     #[constructor]
-    fn constructor(_whitelisted: ContractAddress) {
-        whitelisted::write(_whitelisted);
+    fn constructor(_admin: ContractAddress, _contract_label: felt252, _description: Array::<felt252>) {
+        admin::write(_admin);
         size_index::write(0);
+        contract_label::write(_contract_label);
+        description_length::write(_description.len());
+        deconstruct_description_array(_description, 0_u32);
+    }
+
+    // Function used to whitelist a contract
+    #[external]
+    fn add_in_whitelist(address_to_whitelist: ContractAddress) {
+        assert(get_caller_address() == admin::read(), 'not_admin');
+        whitelisted::write(address_to_whitelist, true);
+    }
+
+    // Function used to remove a contract from the whitelist
+    #[external]
+    fn remove_from_whitelist(address_to_remove: ContractAddress) {
+        assert(get_caller_address() == admin::read(), 'not_admin');
+        whitelisted::write(address_to_remove, false);
     }
 
     // Function used to anchor a new value
     #[external]
     fn anchor(message: felt252) {
+        assert(whitelisted::read(get_caller_address()) , 'not_whitelisted_caller');
         assert(!(message_timestamp::read(message) > 0), 'already_anchored');
-        assert(get_caller_address() == whitelisted::read() , 'not_whitelisted_caller');
         message_values::write(size_index::read(), message);
         message_timestamp::write(message, get_block_timestamp());
         size_index::write(size_index::read() + 1);
+    }
+
+    // Write a new contract label
+    #[external]
+    fn set_contract_label(_contract_label: felt252) {
+        assert(get_caller_address() == admin::read(), 'not_admin');
+        contract_label::write(_contract_label);
+    }
+
+    // Write a new admin
+    #[external]
+    fn set_admin(_admin: ContractAddress) {
+        assert(get_caller_address() == admin::read(), 'not_admin');
+        admin::write(_admin);
+    }
+    
+    fn deconstruct_description_array(mut values: Array::<felt252>, index: u32) {
+        if index < description_length::read() {
+            description::write(index, *values.at(0));
+            values.pop_front();
+            construct_description_array(values, index + 1);
+        }
+    }
+
+    #[view]
+    fn get_description() -> Array::<felt252> {
+        let mut values = ArrayTrait::new();
+        construct_description_array(values, 0_u32)
+    }
+
+    fn construct_description_array(mut values: Array::<felt252>, index: u32) -> Array::<felt252> {
+        if index < description_length::read() {
+            values.append(description::read(index));
+            construct_description_array(values, index + 1)
+        } else { values }
+    }
+
+    #[view]
+    fn get_contract_label() -> felt252 {
+        contract_label::read()
     }
 
     #[view]
@@ -61,6 +122,33 @@ mod Anchoring {
     #[view]
     fn get_anchored_timestamp(message: felt252) -> u64 {
         message_timestamp::read(message)
+    }
+
+    #[view]
+    fn is_whitelisted(address_to_check: ContractAddress) -> bool {
+        whitelisted::read(address_to_check)
+    }
+
+    // Get admin
+    #[view]
+    fn get_admin() -> ContractAddress {
+        admin::read()
+    }
+
+    #[view]
+    // Get metadatas about the contract
+    fn get_metadatas() -> Array::<felt252> {
+        let mut metadatas = ArrayTrait::new();
+        metadatas.append('name: ');
+        metadatas.append(contract_label::read());
+        metadatas.append(' | author: ');
+        metadatas.append('smart-chain ');
+        metadatas.append('<contact@smart-chain.fr>');
+        metadatas.append(' | version: 1.0.0 |');
+        metadatas.append(' license: MIT | ');
+        metadatas.append(' | description:');
+        // description
+        metadatas
     }
 
 }

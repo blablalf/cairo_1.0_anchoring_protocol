@@ -1,3 +1,4 @@
+use core::serde::Serde;
 use core::traits::Into;
 #[contract]
 mod Factory {
@@ -11,7 +12,8 @@ mod Factory {
 
     // Storage variable used to store the anchored value
     struct Storage {
-        whitelist: LegacyMap<ContractAddress, ContractAddress>, // anchored_contract_address, user_account_contract_address
+        deployed_length: u128, // length of the deployed contracts array
+        deployed: LegacyMap<u128, ContractAddress>, // anchored_contract_address, user_account_contract_address
         admin: ContractAddress, // account wallet authorized to push new contracts
         class_hash: ClassHash, // class hash of the anchoring contract
     }
@@ -31,12 +33,14 @@ mod Factory {
 
     // Function used to deploy and add a new contract to the whitelist
     #[external]
-    fn deploy(whitelisted: ContractAddress) -> ContractAddress {
+    fn deploy(_admin: ContractAddress, contract_label: felt252) -> ContractAddress { //, _description: Array::<felt252> 
         assert(get_caller_address() == admin::read() , 'not_whitelisted_caller');
 
         // Creating the call data for the deploy syscall
         let mut calldata_array = ArrayTrait::new();
-        calldata_array.append(whitelisted.into());
+        calldata_array.append(_admin.into());
+        calldata_array.append(contract_label.into());
+        //calldata_array.append(_description.into().);
 
         // Deploying the contract
         let result = deploy_syscall(
@@ -51,7 +55,8 @@ mod Factory {
 
         // Adding the contract to the whitelist mapping
         let (deployed_addr, _) = result.unwrap_syscall();
-        whitelist::write(deployed_addr, whitelisted);
+        deployed::write(deployed_length::read(), deployed_addr);
+        deployed_length::write(deployed_length::read() + 1);
 
         // Returning the deployed contract address
         deployed_addr
@@ -63,7 +68,34 @@ mod Factory {
     }
 
     #[view]
-    fn get_whitelisted(anchored_contract_address: ContractAddress) -> ContractAddress {
-        whitelist::read(anchored_contract_address)
+    // Get metadatas about the contract
+    fn get_metadatas() -> Array::<felt252> {
+        let mut metadatas = ArrayTrait::new();
+        metadatas.append('name: ');
+        metadatas.append('Smart-chain / Secure Factory');
+        metadatas.append(' | author: ');
+        metadatas.append('smart-chain ');
+        metadatas.append('<contact@smart-chain.fr>');
+        metadatas.append(' | version: 1.0.0 |');
+        metadatas.append(' license: MIT | ');
+        metadatas.append('homepage: ');
+        metadatas.append('https://secure.smart-chain.fr');
+        metadatas.append(' | description:');
+        metadatas.append('Factory for Secure product |');
+        metadatas
     }
+
+    #[view]
+    fn get_deployed() -> Array::<felt252> {
+        let mut deployed_addr = ArrayTrait::new();
+        construct_deployed_values_array(deployed_addr, 0_u128)
+    }
+
+    fn construct_deployed_values_array(mut values: Array::<felt252>, index: u128) -> Array::<felt252> {
+        if index < deployed_length::read() {
+            values.append(deployed::read(index).into());
+            construct_deployed_values_array(values, index + 1)
+        } else { values }
+    }
+
 }
