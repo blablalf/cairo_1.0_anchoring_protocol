@@ -11,7 +11,8 @@ mod Anchoring {
         contract_label: felt252, // The label of the client
         admin: ContractAddress, // The address of the admin of contract
         size_index: u128, // size of the array
-        message_values: LegacyMap<u128, felt252>, // index, message
+        message_values: LegacyMap<u128, LegacyMap::<u16, felt252>>, // index, message
+        message_array_length: LegacyMap<u128, u16>, // The length of the array
         message_timestamp: LegacyMap<felt252, u64>, // message, timestamp
         whitelisted: LegacyMap<ContractAddress, bool>, // The address of the whitelisted contract
         description_length: u32, // The length of the array
@@ -44,7 +45,7 @@ mod Anchoring {
 
     // Function used to anchor a new value
     #[external]
-    fn anchor(message: felt252) {
+    fn anchor(message: Array::<felt252>) {
         assert(whitelisted::read(get_caller_address()) , 'not_whitelisted_caller');
         assert(!(message_timestamp::read(message) > 0), 'already_anchored');
         message_values::write(size_index::read(), message);
@@ -69,7 +70,7 @@ mod Anchoring {
     fn deconstruct_description_array(mut values: Array::<felt252>, index: u32) {
         if index < description_length::read() {
             description::write(index, *values.at(0));
-            values.pop_front();
+            //values.pop_front();
             construct_description_array(values, index + 1);
         }
     }
@@ -140,15 +141,20 @@ mod Anchoring {
     fn get_metadatas() -> Array::<felt252> {
         let mut metadatas = ArrayTrait::new();
         metadatas.append('name: ');
-        metadatas.append(contract_label::read());
-        metadatas.append(' | author: ');
-        metadatas.append('smart-chain ');
-        metadatas.append('<contact@smart-chain.fr>');
-        metadatas.append(' | version: 1.0.0 |');
-        metadatas.append(' license: MIT | ');
-        metadatas.append(' | description:');
-        // description
-        metadatas
+        metadatas.append(contract_label::read()); // 31 char max
+        metadatas.append(' | author: smart-chain <contact');
+        metadatas.append('@smart-chain.fr> | version: 1.0');
+        metadatas.append('.0 | license: MIT |  | descript');
+        metadatas.append('ion: ');
+        concatenate_arrays(metadatas, get_description())
+    }
+
+    fn concatenate_arrays(mut array1: Array::<felt252>, mut array2: Array::<felt252>) -> Array::<felt252> {
+        if array2.len() > 0 {
+            array1.append(*array2.at(0));
+            array2.pop_front();
+            concatenate_arrays(array1, array2)
+        } else { array1 }
     }
 
 }

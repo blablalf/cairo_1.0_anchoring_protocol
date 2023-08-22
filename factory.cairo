@@ -71,30 +71,26 @@ mod Factory {
     // Get metadatas about the contract
     fn get_metadatas() -> Array::<felt252> {
         let mut metadatas = ArrayTrait::new();
-        metadatas.append('name: ');
-        metadatas.append('Smart-chain / Secure Factory');
-        metadatas.append(' | author: ');
-        metadatas.append('smart-chain ');
-        metadatas.append('<contact@smart-chain.fr>');
-        metadatas.append(' | version: 1.0.0 |');
-        metadatas.append(' license: MIT | ');
-        metadatas.append('homepage: ');
-        metadatas.append('https://secure.smart-chain.fr');
-        metadatas.append(' | description:');
-        metadatas.append('Factory for Secure product |');
+        metadatas.append('name: Smart-chain / Secure Fact');
+        metadatas.append('ory | author: smart-chain <cont');
+        metadatas.append('act@smart-chain.fr> | version: ');
+        metadatas.append('1.0.0 | license: MIT | homepage');
+        metadatas.append(': https://secure.smart-chain.fr');
+        metadatas.append(' | description: Factory for Sec');
+        metadatas.append('ure product |');
         metadatas
     }
 
     #[view]
-    fn get_deployed() -> Array::<felt252> {
+    fn get_deployed_address_array() -> Array::<felt252> {
         let mut deployed_addr = ArrayTrait::new();
-        construct_deployed_values_array(deployed_addr, 0_u128)
+        construct_deployed_address_array(deployed_addr, 0_u128)
     }
 
-    fn construct_deployed_values_array(mut values: Array::<felt252>, index: u128) -> Array::<felt252> {
+    fn construct_deployed_address_array(mut values: Array::<felt252>, index: u128) -> Array::<felt252> {
         if index < deployed_length::read() {
             values.append(deployed::read(index).into());
-            construct_deployed_values_array(values, index + 1)
+            construct_deployed_address_array(values, index + 1)
         } else { values }
     }
 
