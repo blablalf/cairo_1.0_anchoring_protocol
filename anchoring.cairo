@@ -11,9 +11,9 @@ mod Anchoring {
         contract_label: felt252, // The label of the client
         admin: ContractAddress, // The address of the admin of contract
         size_index: u128, // size of the array
-        message_values: LegacyMap<u128, LegacyMap::<u16, felt252>>, // index, message
-        message_array_length: LegacyMap<u128, u16>, // The length of the array
-        message_timestamp: LegacyMap<felt252, u64>, // message, timestamp
+        message_values: LegacyMap<u128, LegacyMap::<u32, felt252>>, // index, message
+        message_array_length: LegacyMap<u128, u32>, // The length of the array
+        message_timestamp: LegacyMap<u32, felt252>, // index, timestamp
         whitelisted: LegacyMap<ContractAddress, bool>, // The address of the whitelisted contract
         description_length: u32, // The length of the array
         description: LegacyMap::<u32, felt252>, // The description of the contract
@@ -47,9 +47,9 @@ mod Anchoring {
     #[external]
     fn anchor(message: Array::<felt252>) {
         assert(whitelisted::read(get_caller_address()) , 'not_whitelisted_caller');
-        assert(!(message_timestamp::read(message) > 0), 'already_anchored');
-        message_values::write(size_index::read(), message);
-        message_timestamp::write(message, get_block_timestamp());
+        //assert(!(message_timestamp::read(message) > 0), 'already_anchored');
+        write_anchored_message_array(message, 0_u32);
+        message_timestamp::write(0_u32, get_block_timestamp());
         size_index::write(size_index::read() + 1);
     }
 
@@ -70,7 +70,7 @@ mod Anchoring {
     fn deconstruct_description_array(mut values: Array::<felt252>, index: u32) {
         if index < description_length::read() {
             description::write(index, *values.at(0));
-            //values.pop_front();
+            // values.pop_front();
             construct_description_array(values, index + 1);
         }
     }
@@ -81,7 +81,7 @@ mod Anchoring {
         construct_description_array(values, 0_u32)
     }
 
-    fn construct_description_array(mut values: Array::<felt252>, index: u32) -> Array::<felt252> {
+    fn construct_description_array(values: Array::<felt252>, index: u32) -> Array::<felt252> {
         if index < description_length::read() {
             values.append(description::read(index));
             construct_description_array(values, index + 1)
@@ -107,6 +107,21 @@ mod Anchoring {
         } else { values }
     }
 
+    fn write_anchored_message_array(message: Array::<felt252>, index: u16) {
+        if index < message.len() {
+            message_values::write(size_index::read(), (index, *message.at(index)));
+            write_anchored_message_array(message, index + 1)
+        }
+        size_index::write(size_index::read() + 1);
+    }
+
+    fn construct_anchored_message_array(message_index: u128, mut message: Array::<u64>, array_index: u128) -> Array::<felt252> {
+        if array_index < message_values::read(message_index).len() {
+            let message_part = message_values::read(message_index).at(array_index);
+            message.append(message_part);
+        } else { message }
+    }
+
     #[view]
     fn get_anchored_values() -> Array::<felt252> {
         let mut values = ArrayTrait::new();
@@ -121,7 +136,7 @@ mod Anchoring {
     }
 
     #[view]
-    fn get_anchored_timestamp(message: felt252) -> u64 {
+    fn get_anchored_timestamp(message: Array::<felt252>) -> u64 {
         message_timestamp::read(message)
     }
 
